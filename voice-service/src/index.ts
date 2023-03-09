@@ -14,20 +14,25 @@ initializeRabbitMq().then(async (channel) => {
   await channel.consume(voicesQueue, async (msg) => {
     if (msg) {
       const jokeText = msg.content.toString();
-      const voice = await generateVoice(jokeText);
+      const buffer = await generateVoice(jokeText);
 
-      const fileName = `audio-${Date.now()}.mp3`;
+      const fileName = `audio-${Date.now()}.wav`;
+      const filesDirectory = `${process.cwd()}/audios`;
+
+      if (!fs.existsSync(filesDirectory)){
+        fs.mkdirSync(filesDirectory);
+      }
+
       const filePath = path.join(process.cwd(), "audios", fileName);
 
-      fs.writeFile(filePath, voice, () => {
-        console.log("=======")
-        console.log('Input joke text was: ');
-        console.log(jokeText);
-        console.log();
-        console.log('Audio has successfully been written to:');
-        console.log(filePath);
-        console.log("=======")
-      });
+      fs.writeFileSync(filePath, buffer);
+      console.log("=======")
+      console.log('Input joke text was: ');
+      console.log(jokeText);
+      console.log();
+      console.log('Audio has successfully been written to:');
+      console.log(filePath);
+      console.log("=======")
 
       await channel.ack(msg);
     }

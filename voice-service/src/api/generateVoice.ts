@@ -1,5 +1,4 @@
 import axios from "axios";
-import * as fs from "fs";
 
 export const generateVoice = async (text: string): Promise<Buffer> => {
   const encodedParams = getEncodedParams(text);
@@ -16,8 +15,9 @@ export const generateVoice = async (text: string): Promise<Buffer> => {
     }
   );
 
-  const data = Buffer.from(response.data);
-  return data;
+  const data = response.data;
+
+  return Buffer.from(data.split('base64,')[1], 'base64')
 };
 
 const getEncodedParams = (text: string) => {
@@ -26,5 +26,6 @@ const getEncodedParams = (text: string) => {
   encodedParams.append("hl", "en-us");
   encodedParams.append("r", "0");
   encodedParams.append("c", "mp3");
+  encodedParams.append("b64", "true");
   return encodedParams;
 };
